@@ -27,7 +27,7 @@ export default function AddressStep() {
     setTeaserState(detectStateFromAddress(inputAddress));
   }, [inputAddress]);
 
-  const lookupAddress = useCallback(async (addr: string) => {
+  const lookupAddress = useCallback(async (addr: string, placeId?: string) => {
     const trimmed = addr.trim();
     if (!trimmed) { setError('Please enter your full property address.'); return; }
 
@@ -38,8 +38,12 @@ export default function AddressStep() {
     setAddressConfirmed(false);
 
     try {
-      // Geocode
-      const geoRes = await fetch(`/api/geocode?address=${encodeURIComponent(trimmed)}`);
+      // Prefer place_id lookup (more reliable than text geocoding)
+      const geocodeUrl = placeId
+        ? `/api/geocode?place_id=${encodeURIComponent(placeId)}`
+        : `/api/geocode?address=${encodeURIComponent(trimmed)}`;
+
+      const geoRes = await fetch(geocodeUrl);
       const geoData = await geoRes.json();
       if (!geoRes.ok || !geoData.lat) {
         setError('Address not found. Please enter a full street address including city and state.');
@@ -65,10 +69,10 @@ export default function AddressStep() {
     lookupAddress(inputAddress);
   };
 
-  const handleSelectAddress = useCallback((addr: string) => {
+  const handleSelectAddress = useCallback((addr: string, placeId: string) => {
     setInputAddress(addr);
     setError('');
-    setTimeout(() => lookupAddress(addr), 50);
+    setTimeout(() => lookupAddress(addr, placeId), 50);
   }, [setInputAddress, lookupAddress]);
 
   const handleConfirm = () => {

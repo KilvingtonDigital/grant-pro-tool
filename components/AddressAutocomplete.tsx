@@ -15,7 +15,7 @@ interface Prediction {
 interface AddressAutocompleteProps {
   value: string;
   onChange: (value: string) => void;
-  onSelect: (address: string) => void;
+  onSelect: (address: string, placeId: string) => void;
   placeholder?: string;
   accentColor?: string;
   icon?: 'pin' | 'search';
@@ -81,7 +81,7 @@ export default function AddressAutocomplete({
   const handleSelect = (prediction: Prediction) => {
     const address = prediction.description;
     onChange(address);
-    onSelect(address);
+    onSelect(address, prediction.place_id);
     setPredictions([]);
     setIsOpen(false);
     sessionTokenRef.current = crypto.randomUUID();
